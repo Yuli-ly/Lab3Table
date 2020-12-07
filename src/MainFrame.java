@@ -217,6 +217,8 @@ public class MainFrame extends JFrame {
             out.close();
         } catch (FileNotFoundException e) { }
     }
+
+
     public static void main(String[] args) {
         if (args.length==0) {
             System.out.println("Невозможно табулировать многочлен, для которого не задано ни одного коэффициента!");
