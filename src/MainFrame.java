@@ -41,6 +41,7 @@ public class MainFrame extends JFrame {
     private JMenuItem menuHelpAbout;
     private Box hBoxResult;
 
+    private GornerTableModel data;
     public MainFrame(Double[] coefficients) {
         super("Табулирование многочлена на отрезке по схеме Горнера");
         this.coefficients = coefficients;
@@ -127,6 +128,42 @@ public class MainFrame extends JFrame {
         hBoxResult.add(new JPanel());
         hBoxResult.setBackground(Color.ORANGE);
         getContentPane().add(hBoxResult, BorderLayout.CENTER);
+    }
+
+    protected void saveToGraphicsFile(File selectedFile) {
+        try {
+            DataOutputStream out = new DataOutputStream(new
+                    FileOutputStream(selectedFile));
+            for (int i = 0; i<data.getRowCount(); i++) {
+                out.writeDouble((Double)data.getValueAt(i,0));
+                out.writeDouble((Double)data.getValueAt(i,1));
+            }
+// Закрыть поток вывода
+            out.close();
+        } catch (Exception e) {
+        }
+    }
+    protected void saveToTextFile(File selectedFile) {
+        try {
+            PrintStream out = new PrintStream(selectedFile);
+            out.println("Результаты табулирования многочлена по схеме Горнера");
+            out.print("Многочлен: ");
+            for (int i=0; i<coefficients.length; i++) {
+                out.print(coefficients[i] + "*X^" +
+                        (coefficients.length-i-1));
+                if (i!=coefficients.length-1)
+                    out.print(" + ");
+            }
+            out.println("");
+            out.println("Интервал от " + data.getFrom() + " до " +
+                    data.getTo() + " с шагом " + data.getStep());
+            out.println("====================================================");
+            for (int i = 0; i<data.getRowCount(); i++) {
+                out.println("Значение в точке " + data.getValueAt(i,0)
+                        + " равно " + data.getValueAt(i,1));
+            }
+            out.close();
+        } catch (FileNotFoundException e) { }
     }
 
     public static void main(String[] args) {
