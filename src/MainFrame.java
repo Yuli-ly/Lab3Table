@@ -31,7 +31,7 @@ public class MainFrame extends JFrame {
     private static final int HEIGHT = 500;
     private Double[] coefficients;
     private JFileChooser fileChooser = null;
-
+    private AboutFrame Aframe=new AboutFrame();
     private JMenuItem saveToTextMenuItem;
     private JMenuItem saveToGraphicsMenuItem;
     private JMenuItem searchValueMenuItem;
@@ -55,7 +55,10 @@ public class MainFrame extends JFrame {
         menuBar.add(tableMenu);
         JMenu aboutMenu = new JMenu("Справка");
         menuHelpAbout =new JMenuItem("О программе");
-
+        menuHelpAbout.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ev) {
+                Aframe.setVisible(true); }
+        });
         aboutMenu.add(menuHelpAbout);
         menuBar.add(aboutMenu);
         menuBar.setBackground(Color.ORANGE);
@@ -92,7 +95,7 @@ public class MainFrame extends JFrame {
         getContentPane().add(hboxRange, BorderLayout.NORTH);
         JButton buttonCalc = new JButton("Вычислить");
         buttonCalc.setBackground(Color.YELLOW);
-        
+
         JButton buttonReset = new JButton("Очистить поля");
         buttonReset.setBackground(Color.YELLOW);
         buttonReset.addActionListener(new ActionListener() {
