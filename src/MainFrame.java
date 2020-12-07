@@ -40,7 +40,7 @@ public class MainFrame extends JFrame {
     private JTextField textFieldStep;
     private JMenuItem menuHelpAbout;
     private Box hBoxResult;
-
+    private GornerTableCellRenderer renderer = new GornerTableCellRenderer();
     private GornerTableModel data;
     public MainFrame(Double[] coefficients) {
         super("Табулирование многочлена на отрезке по схеме Горнера");
@@ -63,9 +63,40 @@ public class MainFrame extends JFrame {
         aboutMenu.add(menuHelpAbout);
         menuBar.add(aboutMenu);
         menuBar.setBackground(Color.ORANGE);
-
-
-
+        Action saveToTextAction = new AbstractAction("Сохранить в текстовый файл") {
+            public void actionPerformed(ActionEvent event) {
+                if (fileChooser==null) {
+                    fileChooser = new JFileChooser();
+                    fileChooser.setCurrentDirectory(new File("."));
+                }
+                if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION)
+                    saveToTextFile(fileChooser.getSelectedFile());
+            }
+        };
+        saveToTextMenuItem = fileMenu.add(saveToTextAction);
+        saveToTextMenuItem.setEnabled(false);
+        Action saveToGraphicsAction = new AbstractAction("Сохранить данные для построения графика") {
+            public void actionPerformed(ActionEvent event) {
+                if (fileChooser==null) {
+                    fileChooser = new JFileChooser();
+                    fileChooser.setCurrentDirectory(new File("."));
+                }
+                if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION);
+                saveToGraphicsFile(fileChooser.getSelectedFile());
+            }
+        };
+        saveToGraphicsMenuItem = fileMenu.add(saveToGraphicsAction);
+        saveToGraphicsMenuItem.setEnabled(false);
+        Action searchValueAction = new AbstractAction("Найти значение многочлена") {
+            public void actionPerformed(ActionEvent event) {
+                String value = JOptionPane.showInputDialog(MainFrame.this, "Введите значение для поиска",
+                        "Поиск значения", JOptionPane.QUESTION_MESSAGE);
+                renderer.setNeedle(value);
+                getContentPane().repaint();
+            }
+        };
+        searchValueMenuItem = tableMenu.add(searchValueAction);
+        searchValueMenuItem.setEnabled(false);
         JLabel labelForFrom = new JLabel("X изменяется на интервале от:");
         textFieldFrom = new JTextField("0.0", 10);
         textFieldFrom.setMaximumSize(textFieldFrom.getPreferredSize());
@@ -96,7 +127,29 @@ public class MainFrame extends JFrame {
         getContentPane().add(hboxRange, BorderLayout.NORTH);
         JButton buttonCalc = new JButton("Вычислить");
         buttonCalc.setBackground(Color.YELLOW);
-
+        buttonCalc.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    Double from = Double.parseDouble(textFieldFrom.getText());
+                    Double to = Double.parseDouble(textFieldTo.getText());
+                    Double step = Double.parseDouble(textFieldStep.getText());
+                    data = new GornerTableModel(from, to, step, MainFrame.this.coefficients);
+                    JTable table = new JTable(data);
+                    table.setDefaultRenderer(Double.class, renderer);
+                    table.setRowHeight(30);
+                    hBoxResult.removeAll();
+                    hBoxResult.add(new JScrollPane(table));
+                    getContentPane().validate();
+                    saveToTextMenuItem.setEnabled(true);
+                    saveToGraphicsMenuItem.setEnabled(true);
+                    searchValueMenuItem.setEnabled(true);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(MainFrame.this,
+                            "Ошибка в формате записи числа с плавающей точкой", "Ошибочный формат числа",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
         JButton buttonReset = new JButton("Очистить поля");
         buttonReset.setBackground(Color.YELLOW);
         buttonReset.addActionListener(new ActionListener() {
@@ -129,7 +182,6 @@ public class MainFrame extends JFrame {
         hBoxResult.setBackground(Color.ORANGE);
         getContentPane().add(hBoxResult, BorderLayout.CENTER);
     }
-
     protected void saveToGraphicsFile(File selectedFile) {
         try {
             DataOutputStream out = new DataOutputStream(new
@@ -165,7 +217,6 @@ public class MainFrame extends JFrame {
             out.close();
         } catch (FileNotFoundException e) { }
     }
-
     public static void main(String[] args) {
         if (args.length==0) {
             System.out.println("Невозможно табулировать многочлен, для которого не задано ни одного коэффициента!");
